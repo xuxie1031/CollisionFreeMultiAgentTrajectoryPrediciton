@@ -20,6 +20,9 @@ class GMM(nn.Module):
                 elif activation == 'leakyrelu':
                         self.activation = nn.LeakyReLU()
 
+                if args['use_cuda']:
+                        self.to(args['device'])
+
 
         def forward(self, x):
                 x = self.activation(self.enc_h(x))

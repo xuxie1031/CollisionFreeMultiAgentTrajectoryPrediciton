@@ -29,7 +29,7 @@ if args['use_cuda']:
 
 # Initialize network
 net_vae = GCNVAE(args)
-net_vae.load_state_dict(torch.load('../saved_models/teacher_gae.tar'))
+net_vae.load_state_dict(torch.load('../saved_models/teacher_vae.tar'))
 
 net_gmm = GMM(args)
 net_gmm.load_state_dict(torch.load('../saved_models/teacher_gmm.tar'))
@@ -50,11 +50,11 @@ for i, data in enumerate(trDataloader):
 	data_list, graph_list = data
 
 	for idx in range(len(data_list)):
-		inputs = data_list[idx].to(device)
-		As = graph_list[idx][0].to(device)
+		inputs = data_list[idx].to(args['device'])
+		As = graph_list[idx][0].to(args['device'])
 		
 		_, mu, _ = net_vae(inputs, As)
-		mu = mu.detach()
+		mu = mu.mean(dim=1).detach()
 
 		_, mu_q, sigma_q = net_gmm(mu)
 		mu_q, sigma_q = mu_q.detach(), sigma_q.detach()

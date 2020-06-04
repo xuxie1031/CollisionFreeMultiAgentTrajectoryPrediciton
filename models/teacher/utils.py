@@ -168,7 +168,7 @@ def vae_loss(preds, targets, mu, logvar, n_nodes, norms, pos_weights, device):
     return torch.mean(costs+KLDs)
 
 
-def gmmLoss(x, mu_q, sigma_q, M, lambd):
+def gmm_loss(x, mu_q, sigma_q, M, lambd):
     x = x.unsqueeze(1).repeat(1, M, 1)
     prior = F.softmax(lambd, dim=1)
     likelihood = (1/torch.sqrt(2*np.pi*sigma_q))*torch.exp((-1/(2*sigma_q))*torch.norm(x-mu_q, dim=-1)**2)

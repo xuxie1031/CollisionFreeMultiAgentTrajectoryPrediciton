@@ -21,7 +21,7 @@ args['M'] = 4
 args['z_dim'] = 64
 args['gmm_emb_dim'] = 128
 args['lr_vae'] = 1e-4
-args['lr_gmm'] = 1e-4
+args['lr_gmm'] = 1e-6
 args['grad_clip'] = 10.0
 
 assert args['h_dim2'] == args['z_dim']
@@ -82,7 +82,7 @@ for epoch_num in range(pretrainEpochs+trainEpochs):
 			net_vae.training = True
 			recovered, mu, logvar = net_vae(inputs, As)
 			l_vae = vae_loss(recovered, targets, mu, logvar, num_nodes, norms, pos_weights, args['device'])
-			avg_tr_loss += l.item() / len(data_list)
+			avg_tr_loss_vae += l_vae.item() / len(data_list)
 
 			optim_vae.zero_grad()
 			l_vae.backward()
@@ -92,7 +92,7 @@ for epoch_num in range(pretrainEpochs+trainEpochs):
 			# gmm
 			net_vae.training = False
 			_, mu, _ = net_vae(inputs, As)
-			mu = mu.detach()
+			mu = mu.mean(dim=1).detach()
 
 			lambd, mu_q, sigma_q = net_gmm(mu)
 			l_gmm = gmm_loss(mu, mu_q, sigma_q, args['M'], lambd)
@@ -100,24 +100,23 @@ for epoch_num in range(pretrainEpochs+trainEpochs):
 
 			optim_gmm.zero_grad()
 			l_gmm.backward()
-			torch.nn.utils.clip_grad_norm_(net_gmm.parameters, args['grad_clip'])
+			torch.nn.utils.clip_grad_norm_(net_gmm.parameters(), args['grad_clip'])
 			optim_gmm.step()
 
 		batch_time = time.time()-st_time
 		avg_tr_time += batch_time
 
 		num_batch += 1
-		if num_batch == 1000:
-			break
 
 		if i%100 == 99:
 			eta = avg_tr_time/100*(len(trSet)/batch_size-i)
 			print("Epoch no:",epoch_num+1,"| Epoch progress(%):",format(i/(len(trSet)/batch_size)*100,'0.2f'), "| Avg train loss vae:",format(avg_tr_loss_vae/100,'0.4f'), "| Avg train loss gmm:",format(avg_tr_loss_gmm/100,'0.4f'),"| ETA(s):",int(eta))
-			avg_tr_loss = 0
+			avg_tr_loss_vae = 0
+			avg_tr_loss_gmm = 0
 			avg_tr_time = 0
 
 
 print('****** saving model ******')
 if not os.path.exists('../saved_models'): os.makedirs('../saved_models')
 torch.save(net_vae.state_dict(), '../saved_models/teacher_vae.tar')
-torch.save(net_gmm.state_dict(), '../saved_models/teacer_gmm.tar')
+torch.save(net_gmm.state_dict(), '../saved_models/teacher_gmm.tar')
