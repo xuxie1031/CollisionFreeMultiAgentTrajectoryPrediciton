@@ -57,7 +57,7 @@ for i, data in enumerate(trDataloader):
 		mu = mu.mean(dim=1).detach()
 
 		_, mu_q, sigma_q = net_gmm(mu)
-		mu_q, sigma_q = mu_q.detach(), sigma_q.detach()
+		mu_q, sigma_q = mu_q.detach().cpu(), sigma_q.detach().cpu()
 
 		gmm_dict[gmm_count] = (mu_q[-1], sigma_q[-1])
 		gmm_count += 1
