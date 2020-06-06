@@ -48,7 +48,7 @@ class GraphConv(nn.Module):
 
 
 class SocialSTGCNModel(nn.Module):
-	def __init__(self, args):
+    def __init__(self, args):
         super(SocialSTGCNModel, self).__init__()
 
         self.s_kernel_size = args['s_kernel_size']
@@ -91,7 +91,7 @@ class SocialSTGCNModel(nn.Module):
             self.to(args['device'])
 
 
-	def forward(self, x, ngbrs, masks, graph_list, ngbrs_idx, mode='path'):
+    def forward(self, x, ngbrs, masks, graph_list, ngbrs_idx, mode='path'):
         N = x.size(1)
 
         x = self.leaky_relu(self.dyn(x))
@@ -123,11 +123,11 @@ class SocialSTGCNModel(nn.Module):
         x = torch.cat((x, soc_enc), 1)
 
         if mode == 'dist':
-        	mu_p, sigma_p = self.pred_gmm(x)
-        	return mu_p, sigma_p
+            mu_p, sigma_p = self.pred_gmm(x)
+            return mu_p, sigma_p
 
         elif mode == 'path':
-        	x = x.repeat(self.pred_len, 1, 1)
+            x = x.repeat(self.pred_len, 1, 1)
             h_dec, _ = self.dec(x)
             h_dec = h_dec.permute(1, 0, 2)
             o = self.output(h_dec)

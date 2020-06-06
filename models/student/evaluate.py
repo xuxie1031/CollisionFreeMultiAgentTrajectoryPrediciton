@@ -25,7 +25,7 @@ args['Mq'] = 4
 args['Mp'] = 4
 args['out_dim'] = 5
 args['gru'] = False
-args['z_size'] = 15
+args['z_size'] = 64
 
 args['device'] = torch.device('cpu')
 if args['use_cuda']:

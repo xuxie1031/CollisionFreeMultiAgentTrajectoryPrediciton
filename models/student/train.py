@@ -30,7 +30,7 @@ args['lr_path'] = 1e-3
 args['grad_clip'] = 10.0
 args['out_dim'] = 5
 args['gru'] = False
-args['z_size'] = 15
+args['z_size'] = 64
 
 args['device'] = torch.device('cpu')
 if args['use_cuda']:
@@ -55,8 +55,8 @@ a = torch.rand(args['Mq'], args['Mp']).to(args['device'])
 b = torch.rand(args['Mq'], args['Mp']).to(args['device'])
 
 # Initialize optimizer
-pretrainEpochs = 3
-trainEpochs = 5
+pretrainEpochs = 1
+trainEpochs = 1
 
 backbone_params = list(net.dyn.parameters())+ \
                   list(net.graph_conv.parameters())+ \
@@ -103,7 +103,7 @@ for epoch_num in range(pretrainEpochs+trainEpochs):
 			fut = fut.to(args['device'])
 			op_mask = op_mask.to(args['device'])
 			nbrs_idx = nbrs_idx.to(args['device'])
-			mu_q = m_q.to(args['device'])
+			mu_q = mu_q.to(args['device'])
 			sigma_q = sigma_q.to(args['device'])
 
 		# Forward pass

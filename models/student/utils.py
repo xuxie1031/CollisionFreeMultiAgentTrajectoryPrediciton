@@ -7,10 +7,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributions as tdist
 
-from sklearn.cluster import KMeans
-
 from graph import Graph
-from graph_full import GraphFull
+
 #___________________________________________________________________________________________________________________________
 
 ### Dataset class for the NGSIM dataset
@@ -102,7 +100,7 @@ class ngsimDataset(Dataset):
 
         # Initialize neighbors and neighbors length batches:
         nbr_batch_size = 0
-        for _,_,nbrs,_,_,_ in samples:
+        for _,_,nbrs,_,_,_,_ in samples:
             nbr_batch_size += sum([len(nbrs[i])!=0 for i in range(len(nbrs))])
         maxlen = self.t_h//self.d_s + 1
         nbrs_batch = torch.zeros(maxlen,nbr_batch_size,2)
