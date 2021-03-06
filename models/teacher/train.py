@@ -1,6 +1,6 @@
 import torch
 from model import GCNVAE, GMM
-from utils import ngsimDataset, vae_loss, gmm_loss
+from utils import ngsimDataset, gtaDataset, vae_loss, gmm_loss
 from torch.utils.data import DataLoader
 
 import numpy as np
@@ -23,6 +23,8 @@ args['gmm_emb_dim'] = 128
 args['lr_vae'] = 1e-4
 args['lr_gmm'] = 1e-6
 args['grad_clip'] = 10.0
+args['dset_name'] = 'ngsim'
+args['dset_tag'] = 'highway'
 
 assert args['h_dim2'] == args['z_dim']
 
@@ -42,7 +44,13 @@ optim_gmm = torch.optim.Adam(net_gmm.parameters(), lr=args['lr_gmm'])
 batch_size = 32
 
 ## Initialize data loaders
-trSet = ngsimDataset('../../data/TeacherSet.mat')
+trSet = None
+if args['dset_name'] == 'ngsim':
+	trSet = ngsimDataset('../../data/TeacherSetNGSIM.mat')
+elif args['dset_name'] == 'gta':
+	trSet = gtaDataset('../../data/TeacherSetGTA', args['dset_tag'])
+assert trSet != None
+
 trDataloader = DataLoader(trSet,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=trSet.collate_fn)
 
 ## Variables holding train and validation loss values:

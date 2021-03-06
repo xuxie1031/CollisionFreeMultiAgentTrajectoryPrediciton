@@ -1,6 +1,6 @@
 import torch
 from model import SocialSTGCNModel
-from utils import variationUpdate,ngsimDataset,klLoss,maskedNLL,maskedMSE,maskedNLLTest
+from utils import variationUpdate,ngsimDataset,gtaDataset,klLoss,maskedNLL,maskedMSE,maskedNLLTest
 from torch.utils.data import DataLoader
 import time
 import math
@@ -31,6 +31,8 @@ args['grad_clip'] = 10.0
 args['out_dim'] = 5
 args['gru'] = False
 args['z_size'] = 64
+args['dset_name'] = 'ngsim'
+args['dset_tag'] = 'highway'
 
 args['device'] = torch.device('cpu')
 if args['use_cuda']:
@@ -46,10 +48,15 @@ gmm_dict = state['gmm_dict']
 
 # Initialize data loaders
 batch_size = 64
-trSet = ngsimDataset('../../data/TrainSet.mat',gmm_dict,args['Mq'],args['z_size'])
-# valSet = ngsimDataset('../../data/ValSet.mat',gmm_dict,args['Mq'],args['z_size'])
+
+trSet = None
+if args['dset_name'] == 'ngsim':
+	trSet = ngsimDataset('../../data/TrainSetNGSIM.mat',gmm_dict,args['Mq'],args['z_size'])
+elif args['dset_name'] == 'gta':
+	trSet = gtaDataset('../../data/TrainSetGTA',args['dset_tag'],gmm_dict,args['Mq'],args['z_size'])
+assert trSet != None
+
 trDataloader = DataLoader(trSet,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=trSet.collate_fn)
-# valDataloader = DataLoader(valSet,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=valSet.collate_fn)
 
 a = torch.rand(args['Mq'], args['Mp']).to(args['device'])
 b = torch.rand(args['Mq'], args['Mp']).to(args['device'])

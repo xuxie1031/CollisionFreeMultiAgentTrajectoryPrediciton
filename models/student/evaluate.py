@@ -1,6 +1,6 @@
 import torch
 from model import SocialSTGCNModel
-from utils import ngsimDataset,maskedNLL,maskedMSETest,maskedNLLTest
+from utils import ngsimDataset,gtaDataset,maskedNLL,maskedMSETest,maskedNLLTest
 from torch.utils.data import DataLoader
 import time
 
@@ -26,6 +26,8 @@ args['Mp'] = 4
 args['out_dim'] = 5
 args['gru'] = False
 args['z_size'] = 64
+args['dset_name'] = 'ngsim'
+args['dset_tag'] = 'highway'
 
 args['device'] = torch.device('cpu')
 if args['use_cuda']:
@@ -44,7 +46,13 @@ net.load_state_dict(torch.load('../saved_models/student_stgcn.tar'))
 state = torch.load('../saved_models/teacher_gmm_set.tar')
 gmm_dict = state['gmm_dict']
 
-tsSet = ngsimDataset('../../data/TestSet.mat',gmm_dict,args['Mq'],args['z_size'])
+tsSet = None
+if args['dset_name'] == 'ngsim':
+    tsSet = ngsimDataset('../../data/TestSetNGSIM.mat',gmm_dict,args['Mq'],args['z_size'])
+elif args['dset_name'] == 'gta':
+    tsSet = gtaDataset('../../data/TestSetGTA',args['dset_tag'],gmm_dict,args['Mq'],args['z_size'])
+assert tsSet != None
+
 tsDataloader = DataLoader(tsSet,batch_size=64,shuffle=True,num_workers=8,collate_fn=tsSet.collate_fn)
 
 lossVals = torch.zeros(25).cuda()
